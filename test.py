@@ -1,0 +1,3 @@
+from dns_unbound_cache_reader import read_unbound_cache
+
+read_unbound_cache
