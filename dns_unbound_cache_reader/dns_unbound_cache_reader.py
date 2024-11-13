@@ -22,7 +22,7 @@ to_skip = (
     "EOF"
 )
 # Regex patterns
-pattern_line      = r"^([a-zA-Z0-9.-]+)\s+(\d+)\s+IN\s+([A-Z]+)\s+(.+)$"                    # Generic DNS cache line
+pattern_line      = r"^([a-zA-Z0-9._-]+)\s+(\d+)\s+IN\s+([A-Z]+)\s+(.+)$"                    # Generic DNS cache line
 pattern_ipv4_byte = r"(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])"                          # Single byte from an IPv4 address
 pattern_ptr       = (pattern_ipv4_byte + r"\.") * 3 + pattern_ipv4_byte + r".in-addr.arpa"  # Reverse DNS lookup qname
 pattern_srv       = r"^(\d+)\s+(\d+)\s+(\d+)\s+([a-zA-Z0-9.-]+)$"                           # SRV record target
@@ -41,7 +41,6 @@ class DnsRtype(IntEnum):
     Enum class for the DNS resource record types.
     """
     A    = 1   # IPv4 address
-    NS   = 2   # Name server
     PTR  = 12  # Domain name pointer
     AAAA = 28  # IPv6 address
     SRV  = 33  # Service locator

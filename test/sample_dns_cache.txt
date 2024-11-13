@@ -1,0 +1,15 @@
+; unbound cache dump
+START_RRSET_CACHE
+example.com.   300    IN    A    93.184.216.34
+example.com.   300    IN    AAAA 2606:2800:220:1:248:1893:25c8:1946
+example.org.   600    IN    MX   10 mail.example.org.
+example.org.   600    IN    NS   ns1.example.org.
+example.org.   600    IN    NS   ns2.example.org.
+ns1.example.org.  3600  IN    A    192.0.2.1
+ns2.example.org.  3600  IN    A    198.51.100.1
+1.2.0.192.in-addr.arpa. 3600    IN  PTR example.com
+2.2.0.192.in-addr.arpa. 3600    IN  PTR example.com
+_tcp_.matter.example.com.   3600    IN  SRV 10 60 5000 server1.example.com
+_tcp_.matter.example.com.   3600    IN  SRV 20 60 5000 server2.example.com
+END_RRSET_CACHE
+EOF
