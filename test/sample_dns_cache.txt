@@ -7,9 +7,14 @@ example.org.   600    IN    NS   ns1.example.org.
 example.org.   600    IN    NS   ns2.example.org.
 ns1.example.org.  3600  IN    A    192.0.2.1
 ns2.example.org.  3600  IN    A    198.51.100.1
-1.2.0.192.in-addr.arpa. 3600    IN  PTR example.com
-2.2.0.192.in-addr.arpa. 3600    IN  PTR example.com
+; CNAME records
+example1.local. 300 IN   A   192.168.1.100
+example.local.  300 IN   CNAME  example1.local.
+; SRV records
 _tcp_.matter.example.com.   3600    IN  SRV 10 60 5000 server1.example.com
 _tcp_.matter.example.com.   3600    IN  SRV 20 60 5000 server2.example.com
+; PTR records
+1.2.0.192.in-addr.arpa. 3600    IN  PTR example.com
+2.2.0.192.in-addr.arpa. 3600    IN  PTR example.com
 END_RRSET_CACHE
 EOF

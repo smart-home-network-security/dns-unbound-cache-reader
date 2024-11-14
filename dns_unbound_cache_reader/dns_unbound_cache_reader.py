@@ -22,7 +22,7 @@ to_skip = (
     "EOF"
 )
 # Regex patterns
-pattern_line      = r"^([a-zA-Z0-9._-]+)\s+(\d+)\s+IN\s+([A-Z]+)\s+(.+)$"                    # Generic DNS cache line
+pattern_line      = r"^([a-zA-Z0-9._-]+)\s+(\d+)\s+IN\s+([A-Z]+)\s+(.+)$"                   # Generic DNS cache line
 pattern_ipv4_byte = r"(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])"                          # Single byte from an IPv4 address
 pattern_ptr       = (pattern_ipv4_byte + r"\.") * 3 + pattern_ipv4_byte + r".in-addr.arpa"  # Reverse DNS lookup qname
 pattern_srv       = r"^(\d+)\s+(\d+)\s+(\d+)\s+([a-zA-Z0-9.-]+)$"                           # SRV record target
@@ -40,18 +40,19 @@ class DnsRtype(IntEnum):
     """
     Enum class for the DNS resource record types.
     """
-    A    = 1   # IPv4 address
-    PTR  = 12  # Domain name pointer
-    AAAA = 28  # IPv6 address
-    SRV  = 33  # Service locator
+    A     = 1   # IPv4 address
+    CNAME = 5   # Canonical name
+    PTR   = 12  # Domain name pointer
+    AAAA  = 28  # IPv6 address
+    SRV   = 33  # Service locator
 
 
 class DnsTableKeys(Enum):
     """
     Enum class for the allowed dictionary keys.
     """
-    IP      = "ip"
-    SERVICE = "service"
+    IP    = "ip"
+    ALIAS = "alias"
 
 
 def read_dns_cache(
@@ -66,8 +67,8 @@ def read_dns_cache(
                 ip_address: domain_name,
                 ...
             },
-            DnsTableKeys.SERVICE: {
-                service_name: actual_name,
+            DnsTableKeys.ALIAS: {
+                canonical_name: alias,
                 ...
             }
         }
@@ -129,9 +130,9 @@ def read_dns_cache(
         if not match:
             continue
 
-        name  = match.group(1)
-        if name.endswith("."):
-            name = name[:-1]
+        qname  = match.group(1)
+        if qname.endswith("."):
+            qname = qname[:-1]
         rtype = match.group(3)
         rdata = match.group(4)
         if rdata.endswith("."):
@@ -148,27 +149,17 @@ def read_dns_cache(
         if rtype == DnsRtype.A.name or rtype == DnsRtype.AAAA.name:
             ip = rdata
             if DnsTableKeys.IP.name in dns_table:
-                dns_table[DnsTableKeys.IP.name][ip] = name
+                dns_table[DnsTableKeys.IP.name][ip] = qname
             else:
-                dns_table[DnsTableKeys.IP.name] = {ip: name}
+                dns_table[DnsTableKeys.IP.name] = {ip: qname}
 
-        # PTR records
-        if rtype == DnsRtype.PTR.name:
-            match_ptr = re.match(pattern_ptr, name)
-            if match_ptr:
-                # PTR record is a reverse DNS lookup
-                ip = ".".join(reversed(match_ptr.groups()))
-                if ip not in dns_table.get(DnsTableKeys.IP.name, {}):
-                    if DnsTableKeys.IP.name in dns_table:
-                        dns_table[DnsTableKeys.IP.name][ip] = rdata
-                    else:
-                        dns_table[DnsTableKeys.IP.name] = {ip: rdata}
+        # CNAME records
+        if rtype == DnsRtype.CNAME.name:
+            cname = rdata
+            if DnsTableKeys.ALIAS.name in dns_table:
+                dns_table[DnsTableKeys.ALIAS.name][cname] = qname
             else:
-                # PTR record contains generic RDATA
-                if DnsTableKeys.SERVICE.name in dns_table:
-                    dns_table[DnsTableKeys.SERVICE.name][name] = rdata
-                else:
-                    dns_table[DnsTableKeys.SERVICE.name] = {name: rdata}
+                dns_table[DnsTableKeys.ALIAS.name] = {cname: qname}
 
         # SRV records
         if rtype == DnsRtype.SRV.name:
@@ -179,10 +170,37 @@ def read_dns_cache(
             service = match_srv.group(4)
             if service.endswith("."):
                 service = service[:-1]
-            if DnsTableKeys.SERVICE.name in dns_table:
-                dns_table[DnsTableKeys.SERVICE.name][service] = name
+            if DnsTableKeys.ALIAS.name in dns_table:
+                dns_table[DnsTableKeys.ALIAS.name][service] = qname
             else:
-                dns_table[DnsTableKeys.SERVICE.name] = {service: name}
+                dns_table[DnsTableKeys.ALIAS.name] = {service: qname}
+
+        # PTR records
+        if rtype == DnsRtype.PTR.name:
+            match_ptr = re.match(pattern_ptr, qname)
+            if match_ptr:
+                # PTR record is a reverse DNS lookup
+                ip = ".".join(reversed(match_ptr.groups()))
+                if ip not in dns_table.get(DnsTableKeys.IP.name, {}):
+                    if DnsTableKeys.IP.name in dns_table:
+                        dns_table[DnsTableKeys.IP.name][ip] = rdata
+                    else:
+                        dns_table[DnsTableKeys.IP.name] = {ip: rdata}
+            else:
+                # PTR record contains generic RDATA
+                ptr = rdata
+                if DnsTableKeys.ALIAS.name in dns_table:
+                    dns_table[DnsTableKeys.ALIAS.name][qname] = ptr
+                else:
+                    dns_table[DnsTableKeys.ALIAS.name] = {qname: ptr}
+
+
+    ## Post-processing
+    # Replace all cnames with aliases
+    if DnsTableKeys.IP.name in dns_table and DnsTableKeys.ALIAS.name in dns_table:
+        for ip, cname in dns_table[DnsTableKeys.IP.name].items():
+            if cname in dns_table[DnsTableKeys.ALIAS.name]:
+                dns_table[DnsTableKeys.IP.name][ip] = dns_table[DnsTableKeys.ALIAS.name][cname]
 
 
     return dns_table
