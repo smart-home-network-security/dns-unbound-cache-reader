@@ -6,4 +6,5 @@ dist
 *.egg-info
 .pytest_cache
 *.txt
+*.json
 test.py

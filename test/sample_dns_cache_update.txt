@@ -1,0 +1,8 @@
+; unbound cache dump
+START_RRSET_CACHE
+test.com.   300    IN    A    93.184.216.34
+; CNAME records
+test1.local. 300 IN   A   192.168.1.100
+test.local.  300 IN   CNAME  test1.local.
+END_RRSET_CACHE
+EOF
