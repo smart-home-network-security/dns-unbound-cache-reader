@@ -55,30 +55,22 @@ class DnsTableKeys(Enum):
     ALIAS = "alias"
 
 
-def read_dns_cache(
+def update_dns_table(
+        dns_table: dict = {},
         host: str = "127.0.0.1",
         file: str = None
     ) -> dict:
     """
-    Read the Unbound DNS cache and return it as a dictionary,
-    in the format:
-        {
-            DnsTableKeys.IP: {
-                ip_address: domain_name,
-                ...
-            },
-            DnsTableKeys.ALIAS: {
-                canonical_name: alias,
-                ...
-            }
-        }
+    Update the given DNS table by reading the current DNS cache.
 
     Args:
+        dns_table (dict): Dictionary containing the current DNS table.
         host (str): IP address of the Unbound DNS server. Default is localhost.
         file (str): Path to a file containing the Unbound DNS cache. Default is None.
                     If specified, the function reads the cache from the file instead of the server.
+    Returns:
+        dict: Updated DNS table.
     """
-
     ### Get DNS cache ###
     dns_cache = None
 
@@ -116,7 +108,6 @@ def read_dns_cache(
         end_idx   = len(dns_cache)
 
     # Loop through the RRSET section
-    dns_table = {}
     for line in dns_cache[start_idx+1:end_idx]:
 
         # Lines containing metadata, skip
@@ -204,3 +195,32 @@ def read_dns_cache(
 
 
     return dns_table
+
+
+
+def read_dns_cache(
+        host: str = "127.0.0.1",
+        file: str = None
+    ) -> dict:
+    """
+    Read the Unbound DNS cache and return it as a dictionary,
+    in the format:
+        {
+            DnsTableKeys.IP: {
+                ip_address: domain_name,
+                ...
+            },
+            DnsTableKeys.ALIAS: {
+                canonical_name: alias,
+                ...
+            }
+        }
+
+    Args:
+        host (str): IP address of the Unbound DNS server. Default is localhost.
+        file (str): Path to a file containing the Unbound DNS cache. Default is None.
+                    If specified, the function reads the cache from the file instead of the server.
+    Returns:
+        dict: Dictionary containing the DNS table read from the cache.
+    """
+    return update_dns_table({}, host, file)
