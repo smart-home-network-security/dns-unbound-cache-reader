@@ -79,8 +79,9 @@ def update_dns_table(
 
         if host in localhost:
             ## Unbound runs on localhost
-            proc = subprocess.run(cmd.split(), capture_output=True)
-            dns_cache = proc.stdout.decode().strip().split("\n")
+            proc = subprocess.run(cmd.split(), capture_output=True, text=True)
+            dns_cache = proc.stdout.strip().split("\n")
+            del proc
 
         else:
             ## Unbound runs on a remote host
@@ -90,6 +91,9 @@ def update_dns_table(
             # Get the DNS cache
             result = remote.run(cmd)
             dns_cache = result.stdout.strip().split("\n")
+            # Free resources
+            del remote
+            del result
 
     else:
         # Read DNS cache from file
