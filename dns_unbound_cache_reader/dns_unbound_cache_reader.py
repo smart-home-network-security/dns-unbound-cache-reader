@@ -87,13 +87,13 @@ def update_dns_table(
             ## Unbound runs on a remote host
             # SSH connection with remote host
             ssh_config = Config(overrides={"run": {"hide": True}})
-            remote = Connection(host, config=ssh_config)
-            # Get the DNS cache
-            result = remote.run(cmd)
-            dns_cache = result.stdout.strip().split("\n")
-            # Free resources
-            del remote
-            del result
+            with Connection(host, config=ssh_config) as remote:
+                # Get the DNS cache
+                result = remote.run(cmd, warn=True)
+                if not result.failed:
+                    dns_cache = result.stdout.strip().split("\n")
+                # Free resources
+                del result
 
     else:
         # Read DNS cache from file
