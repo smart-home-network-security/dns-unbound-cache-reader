@@ -12,10 +12,10 @@ requires-python = ">=3.8"
 license = "GPL-3.0-or-later"
 keywords = ["network", "dns", "unbound"]
 authors = [
-  {name = "François De Keersmaeker", email = "francois.dekeersmaeker@uclouvain.be" }
+  {name = "François De Keersmaeker", email = "francois.dekeersmaeker+github@proton.me" }
 ]
 maintainers = [
-  {name = "François De Keersmaeker", email = "francois.dekeersmaeker@uclouvain.be" }
+  {name = "François De Keersmaeker", email = "francois.dekeersmaeker+github@proton.me" }
 ]
 
 # Classifiers help users find your project by categorizing it.
@@ -50,5 +50,5 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://forge.uclouvain.be/smart-home-network-security/dns-unbound-cache-reader"
-"Source" = "https://forge.uclouvain.be/smart-home-network-security/dns-unbound-cache-reader"
+"Homepage" = "https://github.com/smart-home-network-security/dns-unbound-cache-reader"
+"Source" = "https://github.com/smart-home-network-security/dns-unbound-cache-reader"
