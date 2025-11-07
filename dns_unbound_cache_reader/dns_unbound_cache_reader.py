@@ -55,6 +55,28 @@ class DnsTableKeys(Enum):
     ALIAS = "alias"
 
 
+def update_dns_table_with_dict(
+        dns_table: dict = {},
+        update_dict: dict = {}
+    ) -> dict:
+    """
+    Update the given DNS table with the provided dictionary.
+
+    Args:
+        dns_table (dict): Dictionary containing the current DNS table.
+        update_dict (dict): Dictionary containing the DNS entries to add.
+    Returns:
+        dict: Updated DNS table.
+    """
+    for ip_address, domain_name in update_dict.items():
+        if DnsTableKeys.IP.name in dns_table and ip_address not in dns_table[DnsTableKeys.IP.name]:
+            dns_table[DnsTableKeys.IP.name][ip_address] = domain_name
+        else:
+            dns_table[DnsTableKeys.IP.name] = {ip_address: domain_name}
+
+    return dns_table
+
+
 def update_dns_table(
         dns_table: dict = {},
         host: str = "127.0.0.1",
