@@ -1,2 +1,3 @@
-# Exception: sample text files for unit testing
+# Exception: test files
+!test.py
 !*.txt
